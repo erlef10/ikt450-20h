@@ -19,11 +19,11 @@ print(Y_train)
 def distance(one,two):
     return numpy.linalg.norm(one-two)
 
-def predict(x,x_rest,y_rest):
+def predict(x,x_rest,y_rest, k):
     neighbors = [(distance(x, x_rest[i]), y_rest[i]) for i in range(len(x_rest))]
     neighbors.sort(key=lambda x: x[0])
 
-    prediction = statistics.mode([neighbor[1] for neighbor in neighbors[0:5]])
+    prediction = statistics.mode([neighbor[1] for neighbor in neighbors[0:k-1]])
     
     return prediction
 
@@ -32,12 +32,13 @@ TP = 0
 TN = 0
 FP = 0
 FN = 0
+K = 6
 
 for i in range(len(X_val)):
     x = X_val[i]
     y = Y_val[i]
 
-    pred = predict(x,X_train,Y_train)
+    pred = predict(x,X_train,Y_train, K)
 
     if(y==1 and pred ==1):
         TP += 1
