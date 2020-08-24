@@ -61,6 +61,7 @@ plt.plot(allloss)
 plt.show()
 
 
+
 import sys
 sys.exit(0)
 
@@ -100,7 +101,6 @@ def predict(row,weights):
 
 for d in training_dataset:
     print(predict(d,weights)[0],d[-1])   #Prints y_hat and y
-
 
 def train_weights(train,learningrate,epochs):
     for epoch in range(epochs):

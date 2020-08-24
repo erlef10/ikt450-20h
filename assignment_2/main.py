@@ -1,37 +1,17 @@
 import numpy as np
 
-# TODO: Learn to manipulate arrays
 # import dataset
-dataset = np.loadtxt("ecoli.data", delimiter="\t", dtype=str)
+training_dataset = np.loadtxt("ecoli.data", delimiter="\t", dtype=str)
 
-rows = []
-
-for i in range(len(dataset)):
-    rows.append([x for x in dataset[i].split(" ") if x.strip() != ""])
-
-dataset = rows
-
-rows = []
-
-# remove unecessary rows
-for row in dataset:
-    if row[-1] not in ["im", "cp"]:
-        continue
-
-    rows.append(row)
-
-dataset = rows
-
-# TODO: Check if the first column is unique for every value
-
-# Print the strain of ecoli
-#[print(row[-1]) for row in dataset]
+# split the dataset
+training_dataset = [row.split() for row in training_dataset]
 
 # Set 'im' as 1 and 'cp' as 0
-training_dataset = [row[:-1]+[0 if row[-1] == 'cp' else 1] for row in dataset]
+training_dataset = [row[:-1]+[0 if row[-1] == 'cp' else 1] for row in training_dataset]
 
 # remove the first column as they are all unique anyhow
 training_dataset = [row[1::] for row in training_dataset]
+
 print(training_dataset[0])
 
 # TODO: Figure out what to connect and how many weights we need
