@@ -4,6 +4,7 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 import numpy as np
 
+torch.manual_seed(7)
 np.random.seed(7)
 
 def get_accuracy(predictions, labels):
@@ -87,27 +88,30 @@ losses = []
 accuracies = []
 
 for epoch in range(1000):
+    # predict label
     outputs = model(X)
 
-    loss = criterion(outputs,Y)
+    # compare prediction to actual value
+    loss = criterion(outputs, Y)
 
     # backpropagate through the graph to determine
     # which weights are causing the losses
     loss.backward()
     losses.append(loss.item())
 
+    # step forward in time (epoch)
     optimizer.step()
 
     accuracy = get_accuracy(outputs, Y)
     accuracies.append(accuracy)
 
+# set model to evaluation after we are done training
+model.eval()
+
 # Setup validation data as Torch Tensors
 validation = torch.Tensor([i[0:8] for i in validation_dataset])
 
-model.eval()
-
 predictions = predict(validation)
-
 print("Accuracy:", get_accuracy(predictions, [x[-1] for x in validation]))
 
 # Plot the accuracy and losses
