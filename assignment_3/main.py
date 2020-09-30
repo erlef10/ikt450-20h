@@ -1,5 +1,4 @@
 import csv,math
-import json
 
 # split the data
 def split(data, index):
@@ -71,7 +70,7 @@ def build_tree(dataset, spaces="    "):
     global classifier_code
 
     if(is_empty(dataset) or is_pure(dataset)):
-        print(spaces, "then", most_common(dataset))
+        #print(spaces, "then", most_common(dataset))
         classifier_code += "\n" + spaces + "return (" + most_common(dataset) + ")"
         return
 
@@ -80,12 +79,12 @@ def build_tree(dataset, spaces="    "):
 
     # if we are unable to make a choice
     if len(data_split) == 1:
-        print(spaces + spaces, "then", most_common(dataset))
+        #print(spaces + spaces, "then", most_common(dataset))
         classifier_code += "\n" + spaces + "return (" + most_common(dataset) + ")"
         return
     else:
         for key, value in data_split.items():
-            print(spaces, "if", key)
+            #print(spaces, "if", key)
             classifier_code += "\n" + spaces + "if(data[" + str(highest) + "] == \"" + str(key) +"\"):"
             build_tree(value, spaces + "   ")
 
@@ -94,7 +93,10 @@ def build_tree(dataset, spaces="    "):
 rows = csv.reader(open('breast-cancer.data', 'r'))
 
 # convert from csv format
-data = [row for row in rows]
+#data = [row for row in rows]
+data = []
+for row in rows:
+    data.append([row[0], row[1], row[2], row[3], row[4], row[5], row[7]])
 
 for row in data:
     if row[0] == "no-recurrence-events":
@@ -106,10 +108,11 @@ for row in data:
 training_data = data[int(len(data) / 2):]
 verification_data = data[:int(len(data) / 2)]
 
+
 build_tree(training_data)
 
 classifier_code += "\n    return (0)"
-print(classifier_code)
+#print(classifier_code)
 
 exec(classifier_code)
 #print(classify(verification_data[0]),verification_data[0])
