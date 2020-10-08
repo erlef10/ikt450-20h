@@ -4,6 +4,7 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 import numpy as np
 
+torch.manual_seed(7)
 np.random.seed(7)
 
 def get_accuracy(predictions, labels):
@@ -15,6 +16,23 @@ def get_accuracy(predictions, labels):
     
     return correct / len(predictions)
 
+def step(data):
+    inputs = data[0:-1]
+    labels = data[-1]
+
+    outputs = model(inputs)
+    prediction = torch.max(outputs.data)
+
+    return prediction
+
+def predict(dataloader):
+    predictions = []
+
+    for i, batch in enumerate(dataloader):
+        pred = step(batch)
+        predictions.append(pred)
+    
+    return predictions
 
 # import dataset
 dataset = np.loadtxt("ecoli.data", delimiter="\t", dtype=str)
@@ -31,6 +49,7 @@ dataset = [row[1::] for row in dataset]
 # convert the strings to floats
 dataset = [[float(x) for x in row] for row in dataset]
 
+# do the shuffle
 np.random.shuffle(dataset)
 
 # split the dataset into training and validation datasets
@@ -39,6 +58,7 @@ splitratio = 0.8
 training_dataset = dataset[:int(len(dataset)*splitratio)]
 validation_dataset = dataset[int(len(dataset)*splitratio):]
 
+# Tranform the numpy arrays to Torch Tensors
 X = torch.Tensor([i[0:7] for i in training_dataset])
 Y = torch.Tensor([i[7] for i in training_dataset])
 
@@ -58,58 +78,43 @@ class Net(nn.Module):
 model = Net()
 model.train()
 
+# Binary Cross Entropy loss function
 criterion = nn.BCELoss()
+
+# Adaptive Moment Estimation optimizer
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-allloss = []
-allaccuracy = []
+losses = []
+accuracies = []
 
 for epoch in range(1000):
+    # predict label
     outputs = model(X)
-    loss = criterion(outputs,Y)
-    loss.backward() # TODO: wtf?
+
+    # compare prediction to actual value
+    loss = criterion(outputs, Y)
+
+    # backpropagate through the graph to determine
+    # which weights are causing the losses
+    loss.backward()
+    losses.append(loss.item())
+
+    # step forward in time (epoch)
     optimizer.step()
-    allloss.append(loss.item())
-    allaccuracy.append(get_accuracy(outputs, Y))
 
-    # for parameter in model.parameters():
-    #     print(parameter)
+    accuracy = get_accuracy(outputs, Y)
+    accuracies.append(accuracy)
 
-validation = torch.Tensor([i[0:8] for i in validation_dataset])
-#Y_val = torch.Tensor([i[7] for i in validation_dataset])
-
+# set model to evaluation after we are done training
 model.eval()
 
-prediction_list = []
+# Setup validation data as Torch Tensors
+validation = torch.Tensor([i[0:8] for i in validation_dataset])
 
-def step(data):
-    inputs = data[0:-1]
-    labels = data[-1]
+predictions = predict(validation)
+print("Accuracy:", get_accuracy(predictions, [x[-1] for x in validation]))
 
-    outputs = model(inputs)
-    pred = torch.max(outputs.data)
-
-    res = torch.Tensor([0])
-
-    if pred > 0.5:
-        res = torch.Tensor([1])
-
-    return res
-
-def predict(dataloader):
-    predictions = []
-
-    for i, batch in enumerate(dataloader):
-        pred = step(batch)
-        predictions.append(pred)
-    
-    return predictions
-
-
-predictions = predict(validation  )
-
-print("Accuracy:", get_accuracy(predictions, [row[-1] for row in validation]))
-
-plt.plot(allaccuracy)
-plt.plot(allloss)
+# Plot the accuracy and losses
+plt.plot(accuracies)
+plt.plot(losses)
 plt.show()

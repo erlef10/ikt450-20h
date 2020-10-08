@@ -105,10 +105,12 @@ for d in training_dataset:
 def train_weights(train,learningrate,epochs):
     for epoch in range(epochs):
         sum_error = 0.0
+
         for row in train:
             prediction,first_layer = predict(row,weights)
             error = row[-1]-prediction
             sum_error += error
+
             #First layer
             weights[0] = weights[0] + learningrate*error*1
             weights[3] = weights[3] + learningrate*error
@@ -122,9 +124,11 @@ def train_weights(train,learningrate,epochs):
             weights[6] = weights[6] + learningrate*error
             weights[7] = weights[7] + learningrate*error*first_layer[0]
             weights[8] = weights[8] + learningrate*error*first_layer[1]
+
         if((epoch%100==0) or (last_error != sum_error)):
             print("Epoch "+str(epoch) + " Learning rate " + str(learningrate) + " Error " + str(sum_error))
         last_error = sum_error
+        
     return weights
 
 learningrate = 0.0001#0.00001
